@@ -1,0 +1,2468 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vínculo — Gestão Clínica</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --ink: #1a1625;
+    --ink-soft: #4a4558;
+    --ink-muted: #8b87a0;
+    --surface: #faf9fc;
+    --surface-2: #f3f1f8;
+    --surface-3: #ebe7f5;
+    --accent: #6b4fa0;
+    --accent-light: #9b79d4;
+    --accent-pale: #ede8f7;
+    --accent-dark: #4a3570;
+    --rose: #c4607a;
+    --rose-pale: #fceef2;
+    --sage: #4a8c6f;
+    --sage-pale: #e8f5ef;
+    --amber: #c47c2b;
+    --amber-pale: #fef4e4;
+    --border: #ddd8eb;
+    --border-soft: #eee9f5;
+    --shadow: 0 1px 4px rgba(107,79,160,0.08);
+    --shadow-md: 0 4px 16px rgba(107,79,160,0.12);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── LAYOUT ── */
+  .app { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: var(--ink);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    overflow-y: auto;
+  }
+
+  .sidebar-logo {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .logo-text {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    color: #fff;
+  }
+
+  .logo-sub {
+    font-size: 10px;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .sidebar-section {
+    padding: 16px 12px 8px;
+  }
+
+  .sidebar-label {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.3);
+    padding: 0 8px;
+    margin-bottom: 6px;
+  }
+
+  .sidebar-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+    font-weight: 400;
+    transition: all 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  .sidebar-btn:hover { background: rgba(255,255,255,0.07); color: #fff; }
+  .sidebar-btn.active { background: var(--accent); color: #fff; }
+  .sidebar-btn .icon { font-size: 15px; width: 18px; text-align: center; flex-shrink: 0; }
+
+  .patient-list-sidebar {
+    flex: 1;
+    padding: 8px 12px;
+    overflow-y: auto;
+  }
+
+  .patient-item-sidebar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    color: rgba(255,255,255,0.65);
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+
+  .patient-item-sidebar:hover { background: rgba(255,255,255,0.07); color: #fff; }
+  .patient-item-sidebar.active { background: rgba(155,121,212,0.25); color: #fff; }
+
+  .avatar-sm {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .main {
+    margin-left: 240px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 0 28px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar-title {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 300;
+    color: var(--ink);
+  }
+
+  .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+  .content { padding: 28px; flex: 1; max-width: 1100px; }
+
+  /* ── COMPONENTS ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-secondary { background: var(--surface-3); color: var(--ink); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-ghost { background: transparent; color: var(--accent); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--accent-pale); }
+  .btn-danger { background: var(--rose-pale); color: var(--rose); }
+  .btn-danger:hover { background: #f8d7e0; }
+  .btn-sm { padding: 5px 11px; font-size: 12px; }
+  .btn-whatsapp { background: #25d366; color: #fff; }
+  .btn-whatsapp:hover { background: #1da851; }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+
+  .card + .card { margin-top: 16px; }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--ink);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .badge-accent { background: var(--accent-pale); color: var(--accent); }
+  .badge-rose { background: var(--rose-pale); color: var(--rose); }
+  .badge-sage { background: var(--sage-pale); color: var(--sage); }
+  .badge-amber { background: var(--amber-pale); color: var(--amber); }
+  .badge-gray { background: var(--surface-3); color: var(--ink-muted); }
+
+  .alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .alert-amber { background: var(--amber-pale); color: var(--amber); border-left: 3px solid var(--amber); }
+  .alert-rose { background: var(--rose-pale); color: var(--rose); border-left: 3px solid var(--rose); }
+  .alert-sage { background: var(--sage-pale); color: var(--sage); border-left: 3px solid var(--sage); }
+  .alert-accent { background: var(--accent-pale); color: var(--accent); border-left: 3px solid var(--accent); }
+
+  .form-group { margin-bottom: 16px; }
+  .form-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 6px; }
+
+  .form-input, .form-textarea, .form-select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--surface);
+    transition: border-color 0.15s;
+    outline: none;
+  }
+
+  .form-input:focus, .form-textarea:focus, .form-select:focus {
+    border-color: var(--accent-light);
+    background: #fff;
+  }
+
+  .form-textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+  .form-textarea.tall { min-height: 160px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+
+  .tab-bar {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+    gap: 0;
+    overflow-x: auto;
+  }
+
+  .tab-btn {
+    padding: 10px 18px;
+    border: none;
+    background: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--ink-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+
+  .tab-btn:hover { color: var(--accent); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+
+  .stat-card {
+    background: #fff;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 300;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label { font-size: 11px; color: var(--ink-muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .session-item {
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    background: #fff;
+  }
+
+  .session-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+
+  .session-number { font-family: 'Fraunces', serif; font-size: 14px; font-weight: 400; color: var(--accent); }
+  .session-date { font-size: 12px; color: var(--ink-muted); }
+
+  .markers-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+  .marker-chip {
+    padding: 2px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    background: var(--accent-pale);
+    color: var(--accent);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .marker-chip.selected { background: var(--accent); color: #fff; }
+
+  .hypothesis-item {
+    border-left: 3px solid var(--accent);
+    padding: 14px 16px;
+    background: #fff;
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    margin-bottom: 12px;
+    border-top: 1px solid var(--border-soft);
+    border-right: 1px solid var(--border-soft);
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .hypothesis-item.high { border-left-color: var(--rose); }
+  .hypothesis-item.medium { border-left-color: var(--amber); }
+  .hypothesis-item.low { border-left-color: var(--sage); }
+
+  .strategy-item {
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    background: #fff;
+    margin-bottom: 10px;
+  }
+
+  .strategy-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  .timeline-item {
+    display: flex;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .timeline-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+
+  .weekly-check-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-sm);
+    background: #fff;
+    margin-bottom: 8px;
+  }
+
+  .check-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .check-toggle {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    background: #fff;
+    font-size: 11px;
+  }
+
+  .check-toggle.confirmed { background: var(--sage); border-color: var(--sage); color: #fff; }
+
+  .doc-template-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius);
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 8px;
+    width: 100%;
+    text-align: left;
+  }
+
+  .doc-template-btn:hover { border-color: var(--accent); background: var(--accent-pale); }
+  .doc-icon { font-size: 22px; }
+  .doc-name { font-size: 13px; font-weight: 500; color: var(--ink); }
+  .doc-desc { font-size: 11px; color: var(--ink-muted); margin-top: 1px; }
+
+  .ai-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: linear-gradient(135deg, var(--accent-pale), #f0ebff);
+    border: 1px solid var(--accent-light);
+    border-radius: 20px;
+    font-size: 10px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .editable-field {
+    position: relative;
+  }
+
+  .editable-field .edit-overlay {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .editable-field:hover .edit-overlay { opacity: 1; }
+
+  .separator {
+    border: none;
+    border-top: 1px solid var(--border-soft);
+    margin: 20px 0;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ink-muted);
+  }
+
+  .empty-state .empty-icon { font-size: 36px; margin-bottom: 12px; }
+  .empty-state p { font-size: 13px; line-height: 1.6; }
+
+  .loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(26,22,37,0.5);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 28px;
+    width: 100%;
+    max-width: 620px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-md);
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .modal-title {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 300;
+  }
+
+  .close-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--ink-muted);
+    padding: 4px;
+  }
+
+  .close-btn:hover { color: var(--ink); }
+
+  .password-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ink);
+  }
+
+  .password-card {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 40px;
+    width: 340px;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+  }
+
+  .password-logo {
+    font-family: 'Fraunces', serif;
+    font-size: 36px;
+    font-weight: 300;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .password-sub { font-size: 12px; color: var(--ink-muted); margin-bottom: 28px; }
+
+  .cid-alert {
+    background: linear-gradient(135deg, #fef9e7, #fdf2f8);
+    border: 1px solid #f0c040;
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 12px;
+    margin-top: 10px;
+  }
+
+  .supervision-field {
+    background: #fffbf0;
+    border: 1px dashed var(--amber);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+  }
+
+  .supervision-note {
+    font-size: 11px;
+    color: var(--amber);
+    margin-bottom: 8px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .doc-preview {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 24px;
+    font-family: 'Times New Roman', serif;
+    font-size: 13px;
+    line-height: 1.8;
+    white-space: pre-wrap;
+    min-height: 400px;
+  }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 768px) {
+    .sidebar { width: 100%; min-width: 100%; position: relative; height: auto; }
+    .main { margin-left: 0; }
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  .tag-cid {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: #e8f4fd;
+    border: 1px solid #90caf9;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #1565c0;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+
+  .tag-dsm {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: #f3e5f5;
+    border: 1px solid #ce93d8;
+    border-radius: 4px;
+    font-size: 11px;
+    color: #6a1b9a;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--surface-3);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="password-screen">
+  <div class="password-card">
+    <div class="password-logo">Vínculo</div>
+    <div class="password-sub">Gestão Clínica · Psicologia</div>
+    <div class="form-group">
+      <input type="password" id="loginPassword" class="form-input" placeholder="Senha de acesso" style="text-align:center">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">Entrar</button>
+    <p style="font-size:11px;color:var(--ink-muted);margin-top:16px">Primeira vez? A senha padrão é <strong>vinculo2026</strong></p>
+    <div id="loginError" class="hidden" style="color:var(--rose);font-size:12px;margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appContainer" class="app hidden">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-text">Vínculo</div>
+      <div class="logo-sub">Gestão Clínica</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Menu</div>
+      <button class="sidebar-btn active" onclick="showView('dashboard')" id="nav-dashboard">
+        <span class="icon">⬛</span> Painel Geral
+      </button>
+      <button class="sidebar-btn" onclick="showView('weekly')" id="nav-weekly">
+        <span class="icon">📅</span> Agenda Semanal
+      </button>
+      <button class="sidebar-btn" onclick="showView('newPatient')" id="nav-newPatient">
+        <span class="icon">＋</span> Novo Paciente
+      </button>
+    </div>
+
+    <div class="patient-list-sidebar" id="sidebarPatients">
+      <div class="sidebar-label">Pacientes</div>
+      <!-- populated by JS -->
+    </div>
+
+    <div style="padding:12px;border-top:1px solid rgba(255,255,255,0.08)">
+      <button class="sidebar-btn" onclick="showView('settings')" style="font-size:12px">
+        <span class="icon">⚙</span> Configurações
+      </button>
+      <button class="sidebar-btn" onclick="doLogout()" style="font-size:12px;color:rgba(255,255,255,0.4)">
+        <span class="icon">↩</span> Sair
+      </button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Painel Geral</div>
+      <div class="topbar-actions" id="topbarActions"></div>
+    </div>
+
+    <div class="content" id="mainContent">
+      <!-- dynamic content -->
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div id="modalBackdrop" class="modal-backdrop hidden" onclick="closeModalBackdrop(event)">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// STORAGE & AUTH
+// ═══════════════════════════════════════════════════════════════
+const PASS_KEY = 'vinculo_pass';
+const DATA_KEY = 'vinculo_data';
+const DEFAULT_PASS = 'vinculo2026';
+
+function getPass() { return localStorage.getItem(PASS_KEY) || DEFAULT_PASS; }
+
+function getData() {
+  try {
+    const raw = localStorage.getItem(DATA_KEY);
+    if (!raw) return defaultData();
+    return JSON.parse(raw);
+  } catch(e) { return defaultData(); }
+}
+
+function saveData(d) { localStorage.setItem(DATA_KEY, JSON.stringify(d)); }
+
+function defaultData() {
+  return { patients: [], sessions: [], hypotheses: [], strategies: [], packages: [], documents: [], supervisionNotes: [], accessLog: [] };
+}
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+
+function logAccess(action) {
+  const d = getData();
+  d.accessLog.push({ timestamp: new Date().toISOString(), action });
+  if (d.accessLog.length > 500) d.accessLog = d.accessLog.slice(-500);
+  saveData(d);
+}
+
+// ── AUTH ──
+function doLogin() {
+  const val = document.getElementById('loginPassword').value;
+  if (val === getPass()) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('appContainer').classList.remove('hidden');
+    logAccess('login');
+    initApp();
+  } else {
+    document.getElementById('loginError').textContent = 'Senha incorreta.';
+    document.getElementById('loginError').classList.remove('hidden');
+  }
+}
+
+document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+function doLogout() {
+  document.getElementById('appContainer').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+  document.getElementById('loginPassword').value = '';
+}
+
+// ── API KEY ──
+let ANTHROPIC_API_KEY = localStorage.getItem('vinculo_apikey') || '';
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+let currentView = 'dashboard';
+let currentPatientId = null;
+let currentPatientTab = 'overview';
+
+function initApp() {
+  renderSidebarPatients();
+  showView('dashboard');
+}
+
+function renderSidebarPatients() {
+  const d = getData();
+  const container = document.getElementById('sidebarPatients');
+  const active = d.patients.filter(p => p.status !== 'encerrado');
+  container.innerHTML = '<div class="sidebar-label">Pacientes</div>';
+  if (active.length === 0) {
+    container.innerHTML += '<div style="font-size:11px;color:rgba(255,255,255,0.3);padding:8px 10px">Nenhum paciente ativo</div>';
+    return;
+  }
+  active.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'patient-item-sidebar' + (currentPatientId === p.id ? ' active' : '');
+    el.innerHTML = `<div class="avatar-sm">${p.initials}</div><span>${p.name}</span>`;
+    el.onclick = () => showPatient(p.id);
+    container.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function showView(view) {
+  currentView = view;
+  currentPatientId = null;
+  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + view);
+  if (navEl) navEl.classList.add('active');
+
+  const views = { dashboard: renderDashboard, weekly: renderWeekly, newPatient: renderNewPatient, settings: renderSettings };
+  if (views[view]) views[view]();
+  renderSidebarPatients();
+}
+
+function showPatient(patientId, tab) {
+  currentPatientId = patientId;
+  currentPatientTab = tab || 'overview';
+  currentView = 'patient';
+  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.patient-item-sidebar').forEach(el => el.classList.remove('active'));
+  renderPatientView();
+  renderSidebarPatients();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+function renderDashboard() {
+  const d = getData();
+  document.getElementById('topbarTitle').textContent = 'Painel Geral';
+  document.getElementById('topbarActions').innerHTML = '';
+
+  const active = d.patients.filter(p => p.status !== 'encerrado');
+  const total = d.sessions.length;
+  const pendingPayments = countPendingPayments(d);
+  const alerts = generateAlerts(d);
+
+  let html = `<div class="stat-row">
+    <div class="stat-card"><div class="stat-number">${active.length}</div><div class="stat-label">Pacientes Ativos</div></div>
+    <div class="stat-card"><div class="stat-number">${total}</div><div class="stat-label">Sessões Registradas</div></div>
+    <div class="stat-card"><div class="stat-number">${pendingPayments}</div><div class="stat-label">Pag. Pendentes</div></div>
+    <div class="stat-card"><div class="stat-number">${alerts.length}</div><div class="stat-label">Alertas</div></div>
+  </div>`;
+
+  // Alertas
+  if (alerts.length > 0) {
+    html += `<div class="card" style="margin-bottom:16px">
+      <div class="card-header"><div class="card-title">⚠ Alertas Clínicos</div></div>`;
+    alerts.forEach(a => {
+      html += `<div class="alert alert-${a.type}">${a.icon} ${a.msg}</div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Pacientes
+  html += `<div class="card">
+    <div class="card-header">
+      <div class="card-title">Pacientes Ativos</div>
+      <button class="btn btn-primary btn-sm" onclick="showView('newPatient')">+ Novo Paciente</button>
+    </div>`;
+
+  if (active.length === 0) {
+    html += `<div class="empty-state"><div class="empty-icon">🌱</div><p>Nenhum paciente cadastrado ainda.<br>Clique em <strong>+ Novo Paciente</strong> para começar.</p></div>`;
+  } else {
+    active.forEach(p => {
+      const sessions = d.sessions.filter(s => s.patientId === p.id);
+      const lastSession = sessions.sort((a,b) => new Date(b.date) - new Date(a.date))[0];
+      const pkg = getCurrentPackage(d, p.id);
+      const sessInPkg = pkg ? sessions.filter(s => s.patientId === p.id && pkg && new Date(s.date) >= new Date(pkg.startDate)).length : 0;
+      const pct = pkg ? Math.round((sessInPkg / pkg.sessionsTotal) * 100) : 0;
+
+      html += `<div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--border-soft);cursor:pointer" onclick="showPatient('${p.id}')">
+        <div class="avatar-sm" style="width:40px;height:40px;font-size:14px">${p.initials}</div>
+        <div style="flex:1">
+          <div style="font-weight:500;font-size:14px">${p.name}</div>
+          <div style="font-size:12px;color:var(--ink-muted)">${sessions.length} sessões · ${p.sessionDay || ''} ${p.sessionTime || ''}</div>
+          ${pkg ? `<div class="progress-bar" style="max-width:200px"><div class="progress-fill" style="width:${pct}%"></div></div>` : ''}
+        </div>
+        <div style="text-align:right">
+          ${lastSession ? `<div style="font-size:12px;color:var(--ink-muted)">Última: ${formatDate(lastSession.date)}</div>` : '<div style="font-size:11px;color:var(--ink-muted)">Sem sessões</div>'}
+          ${pkg && !pkg.paid ? '<div class="badge badge-rose" style="margin-top:4px">Pag. pendente</div>' : ''}
+        </div>
+        <div style="color:var(--ink-muted);font-size:18px">›</div>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+
+  document.getElementById('mainContent').innerHTML = html;
+}
+
+function countPendingPayments(d) {
+  return d.packages.filter(p => !p.paid).length;
+}
+
+function getCurrentPackage(d, patientId) {
+  const pkgs = d.packages.filter(p => p.patientId === patientId).sort((a,b) => b.number - a.number);
+  return pkgs[0] || null;
+}
+
+function generateAlerts(d) {
+  const alerts = [];
+  const now = new Date();
+
+  d.patients.filter(p => p.status !== 'encerrado').forEach(p => {
+    const sessions = d.sessions.filter(s => s.patientId === p.id);
+    const lastSess = sessions.sort((a,b) => new Date(b.date) - new Date(a.date))[0];
+
+    // Sem sessão há mais de 2 semanas
+    if (lastSess) {
+      const days = Math.floor((now - new Date(lastSess.date)) / (1000*60*60*24));
+      if (days > 14) alerts.push({ type: 'amber', icon: '📅', msg: `${p.name}: sem sessão há ${days} dias.` });
+    }
+
+    // Pacote terminando / pagamento pendente
+    const pkg = getCurrentPackage(d, p.id);
+    if (pkg) {
+      const sessInPkg = sessions.filter(s => new Date(s.date) >= new Date(pkg.startDate)).length;
+      if (sessInPkg >= pkg.sessionsTotal && !pkg.paid) {
+        alerts.push({ type: 'rose', icon: '💰', msg: `${p.name}: última sessão do pacote — combinar pagamento do próximo.` });
+      }
+    }
+
+    // Hipótese alta sem estratégia
+    const highHyp = d.hypotheses.filter(h => h.patientId === p.id && h.priority === 'alta');
+    const strats = d.strategies.filter(s => s.patientId === p.id);
+    if (highHyp.length > 0 && strats.length === 0) {
+      alerts.push({ type: 'accent', icon: '🎯', msg: `${p.name}: hipótese de alta prioridade sem estratégia vinculada.` });
+    }
+  });
+
+  return alerts;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WEEKLY CHECKLIST
+// ═══════════════════════════════════════════════════════════════
+function renderWeekly() {
+  const d = getData();
+  document.getElementById('topbarTitle').textContent = 'Agenda Semanal';
+  document.getElementById('topbarActions').innerHTML = '';
+
+  const weekKey = getWeekKey();
+  const confirmations = JSON.parse(localStorage.getItem('vinculo_conf_' + weekKey) || '{}');
+
+  const active = d.patients.filter(p => p.status !== 'encerrado' && p.sessionDay);
+
+  const dayOrder = { 'Segunda': 1, 'Terça': 2, 'Quarta': 3, 'Quinta': 4, 'Sexta': 5, 'Sábado': 6, 'Domingo': 7 };
+  active.sort((a,b) => (dayOrder[a.sessionDay] || 9) - (dayOrder[b.sessionDay] || 9) || (a.sessionTime || '').localeCompare(b.sessionTime || ''));
+
+  let html = `<div class="card">
+    <div class="card-header">
+      <div class="card-title">📅 Semana de ${getWeekLabel()}</div>
+      <div style="font-size:12px;color:var(--ink-muted)">Clique em ✓ para confirmar · clique no WhatsApp para enviar lembrete</div>
+    </div>`;
+
+  if (active.length === 0) {
+    html += `<div class="empty-state"><div class="empty-icon">📅</div><p>Nenhum paciente com horário definido.<br>Edite os dados do paciente para adicionar dia e horário.</p></div>`;
+  } else {
+    let lastDay = '';
+    active.forEach(p => {
+      if (p.sessionDay !== lastDay) {
+        html += `<div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-muted);padding:12px 0 6px;border-top:1px solid var(--border-soft);margin-top:8px">${p.sessionDay}</div>`;
+        lastDay = p.sessionDay;
+      }
+      const confirmed = confirmations[p.id] === 'confirmed';
+      const waMsg = encodeURIComponent(`Olá! Passando para confirmar sua sessão de ${p.sessionDay} às ${p.sessionTime || '—'}. Você confirma? 😊`);
+      const waLink = p.whatsapp ? `https://wa.me/55${p.whatsapp.replace(/\D/g,'')}?text=${waMsg}` : '#';
+
+      html += `<div class="weekly-check-item">
+        <div class="check-status">
+          <div class="check-toggle ${confirmed ? 'confirmed' : ''}" onclick="toggleConfirmation('${p.id}','${weekKey}')" title="Marcar como confirmado">
+            ${confirmed ? '✓' : ''}
+          </div>
+          <div>
+            <div style="font-weight:500;font-size:13px">${p.name}</div>
+            <div style="font-size:12px;color:var(--ink-muted)">${p.sessionTime || 'Horário não definido'} · ${p.sessionDuration || 50} min</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          ${confirmed ? '<span class="badge badge-sage">✓ Confirmado</span>' : '<span class="badge badge-gray">Aguardando</span>'}
+          ${p.whatsapp ? `<a href="${waLink}" target="_blank" class="btn btn-whatsapp btn-sm">📱 WhatsApp</a>` : '<span style="font-size:11px;color:var(--ink-muted)">Sem número</span>'}
+          <button class="btn btn-ghost btn-sm" onclick="showPatient('${p.id}')">Ver caso</button>
+        </div>
+      </div>`;
+    });
+  }
+
+  html += `</div>`;
+  document.getElementById('mainContent').innerHTML = html;
+}
+
+function toggleConfirmation(patientId, weekKey) {
+  const key = 'vinculo_conf_' + weekKey;
+  const conf = JSON.parse(localStorage.getItem(key) || '{}');
+  conf[patientId] = conf[patientId] === 'confirmed' ? 'pending' : 'confirmed';
+  localStorage.setItem(key, JSON.stringify(conf));
+  renderWeekly();
+}
+
+function getWeekKey() {
+  const now = new Date();
+  const day = now.getDay();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+  return monday.toISOString().slice(0,10);
+}
+
+function getWeekLabel() {
+  const now = new Date();
+  const day = now.getDay();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  return `${monday.getDate()}/${monday.getMonth()+1} a ${sunday.getDate()}/${sunday.getMonth()+1}`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NEW PATIENT
+// ═══════════════════════════════════════════════════════════════
+function renderNewPatient() {
+  document.getElementById('topbarTitle').textContent = 'Novo Paciente';
+  document.getElementById('topbarActions').innerHTML = '';
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="card">
+      <div class="card-title" style="margin-bottom:20px;font-family:'Fraunces',serif;font-size:16px">Cadastro do Paciente</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Nome Completo *</label>
+          <input type="text" id="np_name" class="form-input" placeholder="Nome do paciente">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Iniciais (para exibição)</label>
+          <input type="text" id="np_initials" class="form-input" placeholder="Ex: L.L." maxlength="6">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Data de Nascimento</label>
+          <input type="date" id="np_dob" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">WhatsApp (com DDD)</label>
+          <input type="text" id="np_whatsapp" class="form-input" placeholder="Ex: 27999999999">
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="form-group">
+          <label class="form-label">Dia da Sessão</label>
+          <select id="np_sessionDay" class="form-select">
+            <option value="">Selecione</option>
+            <option>Segunda</option><option>Terça</option><option>Quarta</option>
+            <option>Quinta</option><option>Sexta</option><option>Sábado</option><option>Domingo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Horário</label>
+          <input type="time" id="np_sessionTime" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Duração (min)</label>
+          <input type="number" id="np_duration" class="form-input" value="50">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">Sessões por Pacote</label>
+          <input type="number" id="np_pkgSessions" class="form-input" value="4">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Valor do Pacote (R$)</label>
+          <input type="number" id="np_pkgValue" class="form-input" placeholder="Ex: 600">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Queixa Principal</label>
+        <textarea id="np_complaint" class="form-textarea" placeholder="Motivo da busca por atendimento..." style="min-height:80px"></textarea>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+        <button class="btn btn-secondary" onclick="showView('dashboard')">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveNewPatient()">Cadastrar Paciente</button>
+      </div>
+    </div>`;
+}
+
+function saveNewPatient() {
+  const name = document.getElementById('np_name').value.trim();
+  if (!name) { alert('Nome é obrigatório.'); return; }
+
+  let initials = document.getElementById('np_initials').value.trim();
+  if (!initials) {
+    const parts = name.split(' ');
+    initials = parts.length >= 2 ? parts[0][0] + '.' + parts[parts.length-1][0] + '.' : parts[0].slice(0,2).toUpperCase();
+  }
+
+  const d = getData();
+  const patientId = uid();
+
+  const patient = {
+    id: patientId,
+    name, initials,
+    dob: document.getElementById('np_dob').value,
+    whatsapp: document.getElementById('np_whatsapp').value.trim(),
+    sessionDay: document.getElementById('np_sessionDay').value,
+    sessionTime: document.getElementById('np_sessionTime').value,
+    sessionDuration: document.getElementById('np_duration').value || 50,
+    status: 'active',
+    createdAt: new Date().toISOString(),
+    complaint: document.getElementById('np_complaint').value.trim()
+  };
+
+  d.patients.push(patient);
+
+  // Criar pacote inicial
+  const pkgSessions = parseInt(document.getElementById('np_pkgSessions').value) || 4;
+  const pkgValue = parseFloat(document.getElementById('np_pkgValue').value) || 0;
+  if (pkgSessions > 0) {
+    d.packages.push({
+      id: uid(), patientId, number: 1,
+      sessionsTotal: pkgSessions, value: pkgValue,
+      startDate: new Date().toISOString().slice(0,10),
+      paid: false
+    });
+  }
+
+  saveData(d);
+  renderSidebarPatients();
+  showPatient(patientId);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PATIENT VIEW
+// ═══════════════════════════════════════════════════════════════
+function renderPatientView() {
+  const d = getData();
+  const p = d.patients.find(x => x.id === currentPatientId);
+  if (!p) { showView('dashboard'); return; }
+
+  document.getElementById('topbarTitle').textContent = p.name;
+  document.getElementById('topbarActions').innerHTML = `
+    <button class="btn btn-ghost btn-sm" onclick="editPatient('${p.id}')">✏ Editar cadastro</button>
+    <button class="btn btn-danger btn-sm" onclick="confirmDeletePatient('${p.id}')">🗑 Excluir</button>`;
+
+  const tabs = [
+    { id: 'overview', label: '📊 Visão Geral' },
+    { id: 'history', label: '👤 Histórico' },
+    { id: 'sessions', label: '📝 Sessões' },
+    { id: 'hypotheses', label: '🔍 Hipóteses' },
+    { id: 'strategies', label: '🎯 Estratégias' },
+    { id: 'documents', label: '📄 Documentos' },
+    { id: 'payments', label: '💰 Pagamentos' },
+    { id: 'supervision', label: '🔒 Supervisão' },
+  ];
+
+  let html = `<div class="tab-bar">`;
+  tabs.forEach(t => {
+    html += `<button class="tab-btn ${currentPatientTab === t.id ? 'active' : ''}" onclick="showPatient('${p.id}','${t.id}')">${t.label}</button>`;
+  });
+  html += `</div>`;
+
+  const tabRenderers = {
+    overview: () => renderPatientOverview(d, p),
+    history: () => renderPatientHistory(d, p),
+    sessions: () => renderPatientSessions(d, p),
+    hypotheses: () => renderPatientHypotheses(d, p),
+    strategies: () => renderPatientStrategies(d, p),
+    documents: () => renderPatientDocuments(d, p),
+    payments: () => renderPatientPayments(d, p),
+    supervision: () => renderPatientSupervision(d, p),
+  };
+
+  html += (tabRenderers[currentPatientTab] || tabRenderers.overview)();
+  document.getElementById('mainContent').innerHTML = html;
+}
+
+// ── OVERVIEW ──
+function renderPatientOverview(d, p) {
+  const sessions = d.sessions.filter(s => s.patientId === p.id).sort((a,b) => new Date(b.date) - new Date(a.date));
+  const hypotheses = d.hypotheses.filter(h => h.patientId === p.id);
+  const strategies = d.strategies.filter(s => s.patientId === p.id);
+  const pkg = getCurrentPackage(d, p.id);
+  const alerts = generateAlerts(d).filter(a => a.msg.startsWith(p.name));
+
+  const sessInPkg = pkg ? sessions.filter(s => new Date(s.date) >= new Date(pkg.startDate)).length : 0;
+  const pct = pkg ? Math.round((sessInPkg / pkg.sessionsTotal) * 100) : 0;
+
+  let html = '';
+
+  alerts.forEach(a => { html += `<div class="alert alert-${a.type}">${a.icon} ${a.msg}</div>`; });
+
+  html += `<div class="stat-row">
+    <div class="stat-card"><div class="stat-number">${sessions.length}</div><div class="stat-label">Sessões</div></div>
+    <div class="stat-card"><div class="stat-number">${hypotheses.length}</div><div class="stat-label">Hipóteses</div></div>
+    <div class="stat-card"><div class="stat-number">${strategies.filter(s=>s.status==='ativo').length}</div><div class="stat-label">Estratégias Ativas</div></div>
+    <div class="stat-card"><div class="stat-number">${pkg ? sessInPkg + '/' + pkg.sessionsTotal : '—'}</div><div class="stat-label">Pacote Atual</div></div>
+  </div>`;
+
+  if (pkg) {
+    html += `<div class="card" style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><strong>Pacote ${pkg.number}</strong> <span style="color:var(--ink-muted);font-size:12px">iniciado em ${formatDate(pkg.startDate)}</span></div>
+        ${!pkg.paid ? `<button class="btn btn-sage btn-sm" style="background:var(--sage);color:#fff" onclick="markPackagePaid('${pkg.id}')">✓ Marcar Pago</button>` : '<span class="badge badge-sage">✓ Pago</span>'}
+      </div>
+      <div class="progress-bar" style="margin-top:10px"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:12px;color:var(--ink-muted);margin-top:4px">${sessInPkg} de ${pkg.sessionsTotal} sessões realizadas</div>
+    </div>`;
+  }
+
+  // Última sessão
+  if (sessions[0]) {
+    html += `<div class="card" style="margin-bottom:16px">
+      <div class="card-header"><div class="card-title">📝 Última Sessão</div><span class="badge badge-gray">${formatDate(sessions[0].date)}</span></div>
+      <div style="font-size:13px;color:var(--ink-soft)">${sessions[0].worked || sessions[0].rawNotes?.slice(0,300) || '—'}</div>
+      ${sessions[0].markers?.length ? `<div class="markers-row">${sessions[0].markers.map(m => `<span class="marker-chip selected">${m}</span>`).join('')}</div>` : ''}
+    </div>`;
+  }
+
+  // Hipóteses ativas alta prioridade
+  const highHyp = hypotheses.filter(h => h.priority === 'alta');
+  if (highHyp.length > 0) {
+    html += `<div class="card">
+      <div class="card-header"><div class="card-title">🔍 Hipóteses Ativas (Alta Prioridade)</div></div>`;
+    highHyp.forEach(h => {
+      html += `<div class="hypothesis-item high">
+        <div style="font-weight:500;font-size:13px">${h.title}</div>
+        <div style="font-size:12px;color:var(--ink-muted);margin-top:4px">${h.description?.slice(0,150) || ''}...</div>
+        ${h.cid10 ? `<span class="tag-cid">${h.cid10}</span>` : ''}
+        ${h.dsm5 ? `<span class="tag-dsm">${h.dsm5}</span>` : ''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  // Estratégias ativas
+  const activeStrats = strategies.filter(s => s.status === 'ativo');
+  if (activeStrats.length > 0) {
+    html += `<div class="card" style="margin-top:16px">
+      <div class="card-header"><div class="card-title">🎯 Estratégias em Andamento</div></div>`;
+    activeStrats.forEach(s => {
+      html += `<div class="strategy-item">
+        <div style="font-weight:500;font-size:13px">${s.title}</div>
+        <div style="font-size:12px;color:var(--ink-muted);margin-top:2px">${s.objective?.slice(0,120) || ''}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  return html;
+}
+
+// ── HISTORY ──
+function renderPatientHistory(d, p) {
+  const sessions = d.sessions.filter(s => s.patientId === p.id).sort((a,b) => new Date(a.date) - new Date(b.date));
+  const age = p.dob ? Math.floor((new Date() - new Date(p.dob)) / (1000*60*60*24*365.25)) : null;
+
+  let html = `<div class="card" style="margin-bottom:16px">
+    <div class="card-header"><div class="card-title">Dados do Paciente</div></div>
+    <div class="grid-2">
+      <div><div class="form-label">Nome</div><div style="font-size:14px">${p.name}</div></div>
+      <div><div class="form-label">Iniciais</div><div>${p.initials}</div></div>
+      <div><div class="form-label">Nascimento</div><div>${p.dob ? formatDate(p.dob) : '—'} ${age ? `(${age} anos)` : ''}</div></div>
+      <div><div class="form-label">WhatsApp</div><div>${p.whatsapp || '—'}</div></div>
+      <div><div class="form-label">Sessão</div><div>${p.sessionDay || '—'} às ${p.sessionTime || '—'}</div></div>
+      <div><div class="form-label">Em acompanhamento desde</div><div>${formatDate(p.createdAt)}</div></div>
+    </div>
+    ${p.complaint ? `<div style="margin-top:14px"><div class="form-label">Queixa Principal</div><div style="font-size:13px;color:var(--ink-soft)">${p.complaint}</div></div>` : ''}
+  </div>`;
+
+  // Linha do tempo
+  html += `<div class="card">
+    <div class="card-header"><div class="card-title">📈 Linha do Tempo</div></div>`;
+
+  if (sessions.length === 0) {
+    html += `<div class="empty-state"><div class="empty-icon">🌱</div><p>Nenhuma sessão registrada ainda.</p></div>`;
+  } else {
+    sessions.forEach(s => {
+      const markers = s.markers || [];
+      html += `<div class="timeline-item">
+        <div>
+          <div class="timeline-dot" style="background:${getMarkerColor(markers)}"></div>
+        </div>
+        <div style="flex:1">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-weight:500;font-size:13px">Sessão ${s.number}</span>
+            <span style="font-size:12px;color:var(--ink-muted)">${formatDate(s.date)}</span>
+          </div>
+          <div style="font-size:12px;color:var(--ink-soft);margin-top:2px">${s.worked?.slice(0,120) || s.rawNotes?.slice(0,120) || '—'}</div>
+          ${markers.length ? `<div class="markers-row" style="margin-top:4px">${markers.map(m => `<span class="marker-chip selected" style="font-size:10px;padding:1px 7px">${m}</span>`).join('')}</div>` : ''}
+        </div>
+      </div>`;
+    });
+  }
+
+  html += `</div>`;
+  return html;
+}
+
+function getMarkerColor(markers) {
+  if (markers.includes('Crise')) return 'var(--rose)';
+  if (markers.includes('Avanço')) return 'var(--sage)';
+  if (markers.includes('Insight')) return 'var(--accent)';
+  return 'var(--ink-muted)';
+}
+
+// ── SESSIONS ──
+function renderPatientSessions(d, p) {
+  const sessions = d.sessions.filter(s => s.patientId === p.id).sort((a,b) => new Date(b.date) - new Date(a.date));
+  const MARKERS = ['Resistência','Insight','Transferência','Crise','Avanço','Regressão','Silêncio','Elaboração'];
+
+  let html = `<div class="card" style="margin-bottom:16px">
+    <div class="card-header"><div class="card-title">+ Registrar Nova Sessão</div></div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">Data da Sessão</label>
+        <input type="date" id="ns_date" class="form-input" value="${new Date().toISOString().slice(0,10)}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nº da Sessão</label>
+        <input type="number" id="ns_number" class="form-input" value="${sessions.length + 1}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cole aqui suas anotações brutas da sessão</label>
+      <textarea id="ns_raw" class="form-textarea tall" placeholder="Cole seu relato completo da sessão aqui. A IA irá organizar em: o que foi trabalhado, como a paciente respondeu, pontos de atenção, marcadores clínicos, hipóteses e estratégias..."></textarea>
+    </div>
+    <div class="form-group">
+      <div class="form-label">Marcadores (opcional — a IA também sugerirá)</div>
+      <div class="markers-row" id="ns_markers_row">
+        ${MARKERS.map(m => `<span class="marker-chip" onclick="toggleMarker(this,'${m}')">${m}</span>`).join('')}
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-primary" onclick="analyzeAndSaveSession('${p.id}')">
+        ✨ Analisar com IA e Salvar
+      </button>
+    </div>
+    <div id="ns_analyzing" class="hidden" style="text-align:center;padding:20px;color:var(--accent)">
+      <div class="loading-spinner" style="margin:0 auto 10px"></div>
+      <div style="font-size:13px">Analisando sessão com IA...</div>
+    </div>
+  </div>`;
+
+  // Sessões anteriores
+  if (sessions.length > 0) {
+    html += `<div class="card-title" style="font-family:'Fraunces',serif;font-size:15px;margin-bottom:14px">Sessões Anteriores</div>`;
+    sessions.forEach(s => {
+      html += `<div class="session-item">
+        <div class="session-header" onclick="toggleSession('sess_${s.id}')">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="session-number">Sessão ${s.number}</div>
+            <span class="session-date">${formatDate(s.date)}</span>
+            ${s.aiAnalysis ? '<span class="ai-badge">✨ IA</span>' : ''}
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="btn btn-danger btn-sm" onclick="event.stopPropagation();confirmDeleteSession('${s.id}','${p.id}')">🗑</button>
+            <span style="color:var(--ink-muted)">▾</span>
+          </div>
+        </div>
+        <div id="sess_${s.id}" class="hidden">
+          ${renderSessionDetail(s, p.id)}
+        </div>
+      </div>`;
+    });
+  }
+
+  return html;
+}
+
+function renderSessionDetail(s, patientId) {
+  return `
+    <div style="margin-top:8px">
+      <div class="form-group">
+        <div class="form-label">O que foi trabalhado</div>
+        <textarea class="form-textarea" id="edit_worked_${s.id}" style="min-height:80px">${s.worked || ''}</textarea>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Como o paciente respondeu</div>
+        <textarea class="form-textarea" id="edit_response_${s.id}" style="min-height:80px">${s.response || ''}</textarea>
+      </div>
+      <div class="form-group">
+        <div class="form-label">Pontos de atenção para a próxima sessão</div>
+        <textarea class="form-textarea" id="edit_attention_${s.id}" style="min-height:80px">${s.attention || ''}</textarea>
+      </div>
+      ${s.cidAlert ? `<div class="cid-alert">🔔 <strong>Alerta clínico:</strong> ${s.cidAlert}</div>` : ''}
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+        <button class="btn btn-secondary btn-sm" onclick="saveSessionEdits('${s.id}','${patientId}')">💾 Salvar edições</button>
+      </div>
+    </div>`;
+}
+
+function toggleSession(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('hidden');
+}
+
+function toggleMarker(el, marker) { el.classList.toggle('selected'); }
+
+async function analyzeAndSaveSession(patientId) {
+  const raw = document.getElementById('ns_raw').value.trim();
+  if (!raw) { alert('Cole as anotações da sessão antes de analisar.'); return; }
+
+  const date = document.getElementById('ns_date').value;
+  const number = parseInt(document.getElementById('ns_number').value) || 1;
+  const selectedMarkers = [...document.querySelectorAll('#ns_markers_row .marker-chip.selected')].map(el => el.textContent);
+
+  document.getElementById('ns_analyzing').classList.remove('hidden');
+  document.querySelector('[onclick*="analyzeAndSaveSession"]').disabled = true;
+
+  const d = getData();
+  const p = d.patients.find(x => x.id === patientId);
+  const existingSessions = d.sessions.filter(s => s.patientId === patientId).sort((a,b) => new Date(a.date)-new Date(b.date));
+  const sessionContext = existingSessions.slice(-3).map(s => `Sessão ${s.number}: ${s.worked || s.rawNotes || ''}`).join('\n\n');
+
+  try {
+    let analysis;
+    if (!ANTHROPIC_API_KEY) {
+      // Análise local simplificada se não há API key
+      analysis = localAnalyzeSession(raw);
+    } else {
+      analysis = await callAI(`Você é um assistente clínico especializado em psicologia. Analise as anotações brutas de sessão abaixo e retorne APENAS um JSON válido sem markdown.
+
+Paciente: ${p.name}
+Contexto das últimas sessões:
+${sessionContext || 'Primeira sessão'}
+
+Anotações brutas desta sessão:
+${raw}
+
+Retorne este JSON exato:
+{
+  "worked": "resumo do que foi trabalhado na sessão",
+  "response": "como o paciente respondeu, afetos, defesas, insights",
+  "attention": "pontos de atenção para a próxima sessão",
+  "markers": ["array", "de", "marcadores", "da lista: Resistência, Insight, Transferência, Crise, Avanço, Regressão, Silêncio, Elaboração"],
+  "cidAlert": "se houver padrão sugestivo de diagnóstico CID-10 ou DSM-5, descreva brevemente. Caso contrário null",
+  "newHypotheses": [{"title":"","description":"","evidence":"","priority":"alta|média|baixa","framework":"TCC|psicodinâmica|apego|sistêmica|integrativa","cid10":"código se aplicável","dsm5":"código se aplicável"}],
+  "newStrategies": [{"title":"","objective":"","howTo":"","status":"ativo"}]
+}`);
+    }
+
+    const sessionId = uid();
+    const markers = [...new Set([...selectedMarkers, ...(analysis.markers || [])])];
+
+    const session = {
+      id: sessionId, patientId, number, date,
+      rawNotes: raw,
+      worked: analysis.worked || raw,
+      response: analysis.response || '',
+      attention: analysis.attention || '',
+      markers,
+      cidAlert: analysis.cidAlert || null,
+      aiAnalysis: true,
+      createdAt: new Date().toISOString()
+    };
+
+    d.sessions.push(session);
+
+    // Salvar novas hipóteses
+    if (analysis.newHypotheses?.length) {
+      analysis.newHypotheses.forEach(h => {
+        if (h.title) {
+          d.hypotheses.push({ id: uid(), patientId, ...h, aiGenerated: true, edited: false });
+        }
+      });
+    }
+
+    // Salvar novas estratégias
+    if (analysis.newStrategies?.length) {
+      analysis.newStrategies.forEach(s => {
+        if (s.title) {
+          d.strategies.push({ id: uid(), patientId, ...s, aiGenerated: true, edited: false });
+        }
+      });
+    }
+
+    // Avançar sessão no pacote
+    const pkg = getCurrentPackage(d, patientId);
+    if (pkg) {
+      const sessInPkg = d.sessions.filter(s => s.patientId === patientId && new Date(s.date) >= new Date(pkg.startDate)).length;
+      if (sessInPkg >= pkg.sessionsTotal) {
+        const newPkg = {
+          id: uid(), patientId,
+          number: pkg.number + 1,
+          sessionsTotal: pkg.sessionsTotal,
+          value: pkg.value,
+          startDate: date,
+          paid: false
+        };
+        d.packages.push(newPkg);
+      }
+    }
+
+    saveData(d);
+    showPatient(patientId, 'sessions');
+
+  } catch(e) {
+    console.error(e);
+    alert('Erro ao analisar. Verifique a chave de API nas configurações ou tente novamente.');
+  } finally {
+    document.getElementById('ns_analyzing').classList.add('hidden');
+  }
+}
+
+function localAnalyzeSession(raw) {
+  // Análise básica local quando não há API key
+  return {
+    worked: raw.slice(0, 500),
+    response: 'Análise manual necessária — adicione uma chave de API nas configurações para análise automática.',
+    attention: 'Revisar anotações e preencher manualmente.',
+    markers: [],
+    cidAlert: null,
+    newHypotheses: [],
+    newStrategies: []
+  };
+}
+
+function saveSessionEdits(sessionId, patientId) {
+  const d = getData();
+  const s = d.sessions.find(x => x.id === sessionId);
+  if (!s) return;
+  s.worked = document.getElementById('edit_worked_' + sessionId)?.value || s.worked;
+  s.response = document.getElementById('edit_response_' + sessionId)?.value || s.response;
+  s.attention = document.getElementById('edit_attention_' + sessionId)?.value || s.attention;
+  s.editedByUser = true;
+  saveData(d);
+  showPatient(patientId, 'sessions');
+}
+
+function confirmDeleteSession(sessionId, patientId) {
+  if (confirm('Excluir esta sessão? Esta ação não pode ser desfeita.')) {
+    const d = getData();
+    d.sessions = d.sessions.filter(s => s.id !== sessionId);
+    saveData(d);
+    showPatient(patientId, 'sessions');
+  }
+}
+
+// ── HYPOTHESES ──
+function renderPatientHypotheses(d, p) {
+  const hypotheses = d.hypotheses.filter(h => h.patientId === p.id);
+
+  let html = `<div class="card" style="margin-bottom:16px">
+    <div class="card-header"><div class="card-title">+ Nova Hipótese Clínica</div></div>
+    <div class="form-group">
+      <label class="form-label">Hipótese</label>
+      <input type="text" id="nh_title" class="form-input" placeholder="Título conciso da hipótese">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fundamentação / Evidências Clínicas</label>
+      <textarea id="nh_desc" class="form-textarea" placeholder="O que você observou? Falas, comportamentos, padrões..."></textarea>
+    </div>
+    <div class="grid-3">
+      <div class="form-group">
+        <label class="form-label">Prioridade</label>
+        <select id="nh_priority" class="form-select">
+          <option value="alta">Alta — central para o caso</option>
+          <option value="média">Média</option>
+          <option value="baixa">Baixa</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Referencial</label>
+        <input type="text" id="nh_framework" class="form-input" placeholder="TCC, psicodinâmica, apego...">
+      </div>
+      <div></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">Código CID-10 (se aplicável)</label>
+        <input type="text" id="nh_cid10" class="form-input" placeholder="Ex: F41.1">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Código DSM-5 (se aplicável)</label>
+        <input type="text" id="nh_dsm5" class="form-input" placeholder="Ex: 300.02">
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <button class="btn btn-primary" onclick="saveHypothesis('${p.id}')">Adicionar Hipótese</button>
+    </div>
+  </div>`;
+
+  if (hypotheses.length === 0) {
+    html += `<div class="empty-state"><div class="empty-icon">🔍</div><p>Nenhuma hipótese registrada.<br>As hipóteses também são geradas automaticamente pela IA ao registrar sessões.</p></div>`;
+  } else {
+    const byPriority = { alta: [], média: [], baixa: [] };
+    hypotheses.forEach(h => { (byPriority[h.priority] || byPriority.baixa).push(h); });
+
+    ['alta','média','baixa'].forEach(prio => {
+      if (byPriority[prio].length === 0) return;
+      html += `<div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-muted);margin-bottom:8px">${prio.toUpperCase()}</div>`;
+      byPriority[prio].forEach(h => {
+        html += `<div class="hypothesis-item ${h.priority}">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="flex:1">
+              <div style="font-weight:500;font-size:13px">${h.title} ${h.aiGenerated && !h.edited ? '<span class="ai-badge">✨ IA</span>' : ''}</div>
+              <div id="hyp_view_${h.id}">
+                <div style="font-size:12px;color:var(--ink-soft);margin-top:6px">${h.description || ''}</div>
+                ${h.evidence ? `<div style="font-size:11px;color:var(--ink-muted);margin-top:6px;font-style:italic">Evidências: ${h.evidence}</div>` : ''}
+                <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
+                  ${h.framework ? `<span class="badge badge-accent">${h.framework}</span>` : ''}
+                  ${h.cid10 ? `<span class="tag-cid">${h.cid10}</span>` : ''}
+                  ${h.dsm5 ? `<span class="tag-dsm">${h.dsm5}</span>` : ''}
+                </div>
+              </div>
+              <div id="hyp_edit_${h.id}" class="hidden" style="margin-top:10px">
+                <textarea class="form-textarea" id="hyp_edit_desc_${h.id}" style="min-height:80px">${h.description||''}</textarea>
+                <input type="text" class="form-input" id="hyp_edit_cid_${h.id}" placeholder="CID-10" value="${h.cid10||''}" style="margin-top:6px">
+                <input type="text" class="form-input" id="hyp_edit_dsm_${h.id}" placeholder="DSM-5" value="${h.dsm5||''}" style="margin-top:6px">
+                <div style="display:flex;gap:6px;margin-top:8px">
+                  <button class="btn btn-primary btn-sm" onclick="saveHypothesisEdit('${h.id}','${p.id}')">Salvar</button>
+                  <button class="btn btn-secondary btn-sm" onclick="document.getElementById('hyp_edit_${h.id}').classList.add('hidden');document.getElementById('hyp_view_${h.id}').classList.remove('hidden')">Cancelar</button>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;margin-left:10px">
+              <button class="btn btn-ghost btn-sm" onclick="editHypothesisInline('${h.id}')">✏</button>
+              <button class="btn btn-danger btn-sm" onclick="confirmDeleteHypothesis('${h.id}','${p.id}')">🗑</button>
+            </div>
+          </div>
+        </div>`;
+      });
+    });
+  }
+
+  return html;
+}
+
+function editHypothesisInline(hId) {
+  document.getElementById('hyp_view_'+hId)?.classList.add('hidden');
+  document.getElementById('hyp_edit_'+hId)?.classList.remove('hidden');
+}
+
+function saveHypothesisEdit(hId, patientId) {
+  const d = getData();
+  const h = d.hypotheses.find(x => x.id === hId);
+  if (!h) return;
+  h.description = document.getElementById('hyp_edit_desc_'+hId)?.value || h.description;
+  h.cid10 = document.getElementById('hyp_edit_cid_'+hId)?.value || '';
+  h.dsm5 = document.getElementById('hyp_edit_dsm_'+hId)?.value || '';
+  h.edited = true;
+  saveData(d);
+  showPatient(patientId, 'hypotheses');
+}
+
+function saveHypothesis(patientId) {
+  const title = document.getElementById('nh_title').value.trim();
+  if (!title) { alert('Título é obrigatório.'); return; }
+  const d = getData();
+  d.hypotheses.push({
+    id: uid(), patientId,
+    title,
+    description: document.getElementById('nh_desc').value.trim(),
+    evidence: '',
+    priority: document.getElementById('nh_priority').value,
+    framework: document.getElementById('nh_framework').value.trim(),
+    cid10: document.getElementById('nh_cid10').value.trim(),
+    dsm5: document.getElementById('nh_dsm5').value.trim(),
+    aiGenerated: false, edited: false
+  });
+  saveData(d);
+  showPatient(patientId, 'hypotheses');
+}
+
+function confirmDeleteHypothesis(hId, patientId) {
+  if (confirm('Excluir esta hipótese?')) {
+    const d = getData();
+    d.hypotheses = d.hypotheses.filter(h => h.id !== hId);
+    saveData(d);
+    showPatient(patientId, 'hypotheses');
+  }
+}
+
+// ── STRATEGIES ──
+function renderPatientStrategies(d, p) {
+  const strategies = d.strategies.filter(s => s.patientId === p.id);
+  const hypotheses = d.hypotheses.filter(h => h.patientId === p.id);
+
+  let html = `<div class="card" style="margin-bottom:16px">
+    <div class="card-header"><div class="card-title">+ Nova Estratégia / Intervenção</div></div>
+    <div class="form-group">
+      <label class="form-label">Estratégia ou Intervenção</label>
+      <input type="text" id="ns2_title" class="form-input" placeholder="Nome da estratégia">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Objetivo Terapêutico</label>
+      <textarea id="ns2_obj" class="form-textarea" style="min-height:70px" placeholder="O que espera alcançar?"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Como Aplicar / Detalhamento</label>
+      <textarea id="ns2_how" class="form-textarea" placeholder="Técnicas, perguntas-chave, materiais..."></textarea>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select id="ns2_status" class="form-select">
+          <option value="pendente">Pendente — a iniciar</option>
+          <option value="ativo">Ativo</option>
+          <option value="concluído">Concluído</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Hipótese Relacionada</label>
+        <select id="ns2_hyp" class="form-select">
+          <option value="">Nenhuma</option>
+          ${hypotheses.map(h => `<option value="${h.id}">${h.title}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <button class="btn btn-primary" onclick="saveStrategy('${p.id}')">Adicionar Estratégia</button>
+    </div>
+  </div>`;
+
+  if (strategies.length === 0) {
+    html += `<div class="empty-state"><div class="empty-icon">🎯</div><p>Nenhuma estratégia registrada.<br>As estratégias também são geradas automaticamente pela IA ao registrar sessões.</p></div>`;
+  } else {
+    const statusGroups = { ativo: [], pendente: [], concluído: [] };
+    strategies.forEach(s => { (statusGroups[s.status] || statusGroups.pendente).push(s); });
+
+    ['ativo','pendente','concluído'].forEach(status => {
+      if (statusGroups[status].length === 0) return;
+      const colors = { ativo: 'var(--sage)', pendente: 'var(--amber)', concluído: 'var(--ink-muted)' };
+      html += `<div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:${colors[status]};margin-bottom:8px;margin-top:16px">${status.toUpperCase()}</div>`;
+      statusGroups[status].forEach(s => {
+        const relHyp = hypotheses.find(h => h.id === s.hypothesisId);
+        html += `<div class="strategy-item">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start">
+            <div style="flex:1">
+              <div style="font-weight:500;font-size:13px">${s.title} ${s.aiGenerated && !s.edited ? '<span class="ai-badge">✨ IA</span>' : ''}</div>
+              <div id="strat_view_${s.id}">
+                ${s.objective ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:4px"><strong>Objetivo:</strong> ${s.objective}</div>` : ''}
+                ${s.howTo ? `<div style="font-size:12px;color:var(--ink-soft);margin-top:4px;white-space:pre-line">${s.howTo}</div>` : ''}
+                ${relHyp ? `<div style="font-size:11px;color:var(--accent);margin-top:6px">🔗 ${relHyp.title}</div>` : ''}
+              </div>
+              <div id="strat_edit_${s.id}" class="hidden" style="margin-top:10px">
+                <textarea class="form-textarea" id="strat_edit_obj_${s.id}" style="min-height:60px">${s.objective||''}</textarea>
+                <textarea class="form-textarea" id="strat_edit_how_${s.id}" style="min-height:100px;margin-top:6px">${s.howTo||''}</textarea>
+                <select class="form-select" id="strat_edit_status_${s.id}" style="margin-top:6px">
+                  <option value="pendente" ${s.status==='pendente'?'selected':''}>Pendente</option>
+                  <option value="ativo" ${s.status==='ativo'?'selected':''}>Ativo</option>
+                  <option value="concluído" ${s.status==='concluído'?'selected':''}>Concluído</option>
+                </select>
+                <div style="display:flex;gap:6px;margin-top:8px">
+                  <button class="btn btn-primary btn-sm" onclick="saveStrategyEdit('${s.id}','${p.id}')">Salvar</button>
+                  <button class="btn btn-secondary btn-sm" onclick="document.getElementById('strat_edit_${s.id}').classList.add('hidden');document.getElementById('strat_view_${s.id}').classList.remove('hidden')">Cancelar</button>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;gap:6px;margin-left:10px">
+              <button class="btn btn-ghost btn-sm" onclick="editStrategyInline('${s.id}')">✏</button>
+              <button class="btn btn-danger btn-sm" onclick="confirmDeleteStrategy('${s.id}','${p.id}')">🗑</button>
+            </div>
+          </div>
+        </div>`;
+      });
+    });
+  }
+
+  return html;
+}
+
+function editStrategyInline(sId) {
+  document.getElementById('strat_view_'+sId)?.classList.add('hidden');
+  document.getElementById('strat_edit_'+sId)?.classList.remove('hidden');
+}
+
+function saveStrategyEdit(sId, patientId) {
+  const d = getData();
+  const s = d.strategies.find(x => x.id === sId);
+  if (!s) return;
+  s.objective = document.getElementById('strat_edit_obj_'+sId)?.value || s.objective;
+  s.howTo = document.getElementById('strat_edit_how_'+sId)?.value || s.howTo;
+  s.status = document.getElementById('strat_edit_status_'+sId)?.value || s.status;
+  s.edited = true;
+  saveData(d);
+  showPatient(patientId, 'strategies');
+}
+
+function saveStrategy(patientId) {
+  const title = document.getElementById('ns2_title').value.trim();
+  if (!title) { alert('Título é obrigatório.'); return; }
+  const d = getData();
+  d.strategies.push({
+    id: uid(), patientId,
+    title,
+    objective: document.getElementById('ns2_obj').value.trim(),
+    howTo: document.getElementById('ns2_how').value.trim(),
+    status: document.getElementById('ns2_status').value,
+    hypothesisId: document.getElementById('ns2_hyp').value || null,
+    aiGenerated: false, edited: false
+  });
+  saveData(d);
+  showPatient(patientId, 'strategies');
+}
+
+function confirmDeleteStrategy(sId, patientId) {
+  if (confirm('Excluir esta estratégia?')) {
+    const d = getData();
+    d.strategies = d.strategies.filter(s => s.id !== sId);
+    saveData(d);
+    showPatient(patientId, 'strategies');
+  }
+}
+
+// ── DOCUMENTS ──
+function renderPatientDocuments(d, p) {
+  const docs = d.documents.filter(doc => doc.patientId === p.id).sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt));
+
+  const templates = [
+    { id: 'declaracao', icon: '📋', name: 'Declaração de Comparecimento', desc: 'Confirma presença em atendimento psicológico' },
+    { id: 'atestado', icon: '🏥', name: 'Atestado Psicológico', desc: 'Documento de saúde mental para fins específicos' },
+    { id: 'relatorio', icon: '📄', name: 'Relatório Psicológico', desc: 'Síntese clínica fundamentada — CFP' },
+    { id: 'laudo', icon: '🔬', name: 'Laudo Psicológico', desc: 'Avaliação diagnóstica com base em testagem ou entrevistas' },
+    { id: 'encaminhamento', icon: '➡', name: 'Encaminhamento', desc: 'Para outro profissional ou serviço' },
+    { id: 'consentimento', icon: '✍', name: 'Termo de Consentimento Informado', desc: 'Exigido pelo CFP para início do processo' },
+    { id: 'alta', icon: '🌟', name: 'Registro de Alta / Encerramento', desc: 'Formaliza o encerramento do acompanhamento' },
+  ];
+
+  let html = `<div class="card" style="margin-bottom:16px">
+    <div class="card-header"><div class="card-title">Gerar Documento</div></div>
+    <p style="font-size:12px;color:var(--ink-muted);margin-bottom:14px">Documentos gerados com base nos dados do prontuário. Edite antes de imprimir/assinar.</p>`;
+
+  templates.forEach(t => {
+    html += `<button class="doc-template-btn" onclick="generateDocument('${p.id}','${t.id}')">
+      <div class="doc-icon">${t.icon}</div>
+      <div><div class="doc-name">${t.name}</div><div class="doc-desc">${t.desc}</div></div>
+      <div style="margin-left:auto;color:var(--accent);font-size:12px">Gerar →</div>
+    </button>`;
+  });
+
+  html += `</div>`;
+
+  if (docs.length > 0) {
+    html += `<div class="card"><div class="card-header"><div class="card-title">Documentos Gerados</div></div>`;
+    docs.forEach(doc => {
+      const tpl = templates.find(t => t.id === doc.type);
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border-soft)">
+        <div>
+          <div style="font-weight:500;font-size:13px">${tpl?.name || doc.type}</div>
+          <div style="font-size:12px;color:var(--ink-muted)">${formatDate(doc.createdAt)}</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="viewDocument('${doc.id}','${p.id}')">Ver / Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="confirmDeleteDoc('${doc.id}','${p.id}')">🗑</button>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  return html;
+}
+
+async function generateDocument(patientId, docType) {
+  const d = getData();
+  const p = d.patients.find(x => x.id === patientId);
+  const sessions = d.sessions.filter(s => s.patientId === patientId).sort((a,b) => new Date(b.date)-new Date(a.date));
+  const hypotheses = d.hypotheses.filter(h => h.patientId === patientId);
+  const strategies = d.strategies.filter(s => s.patientId === patientId);
+  const age = p.dob ? Math.floor((new Date() - new Date(p.dob)) / (1000*60*60*24*365.25)) : null;
+
+  const context = `
+Paciente: ${p.name}, ${age ? age + ' anos' : 'idade não informada'}
+Início do acompanhamento: ${formatDate(p.createdAt)}
+Total de sessões: ${sessions.length}
+Queixa principal: ${p.complaint || 'não registrada'}
+Hipóteses diagnósticas: ${hypotheses.map(h => `${h.title} (${h.framework || ''}${h.cid10 ? ', CID: '+h.cid10 : ''}${h.dsm5 ? ', DSM-5: '+h.dsm5 : ''})`).join('; ') || 'não registradas'}
+Estratégias em andamento: ${strategies.filter(s=>s.status==='ativo').map(s=>s.title).join('; ') || 'não registradas'}
+Última sessão: ${sessions[0] ? formatDate(sessions[0].date) + ' — ' + (sessions[0].worked || '').slice(0,200) : 'sem sessões'}
+  `.trim();
+
+  const docTemplates = {
+    declaracao: `Gere uma DECLARAÇÃO DE COMPARECIMENTO em psicologia, conforme normas do CFP. Deve conter: cidade/data em branco para preenchimento manual, identificação do paciente, declaração de que o mesmo comparece regularmente a atendimento psicológico na frequência de [X] sessões semanais, local para assinatura e CRP da psicóloga. Deixe campos sensíveis como CRP, cidade, e assinatura com "[A PREENCHER]". Escreva em formato de documento formal.`,
+    atestado: `Gere um ATESTADO PSICOLÓGICO conforme Resolução CFP nº 007/2003. Deve ser formal, objetivo, sem revelar diagnóstico sem necessidade, indicando apenas o necessário para a finalidade solicitada. Inclua: identificação do paciente, que o mesmo está em acompanhamento psicológico regular, período de afastamento se aplicável (deixe em branco), CRP e assinatura em "[A PREENCHER]".`,
+    relatorio: `Gere um RELATÓRIO PSICOLÓGICO conforme Resolução CFP nº 06/2019. Estrutura obrigatória: 1. Identificação do solicitante e finalidade; 2. Procedimentos utilizados; 3. Resultados e discussão (síntese clínica fundamentada); 4. Conclusão; 5. Local, data, assinatura e CRP. Use os dados clínicos fornecidos para a síntese. Escreva em linguagem técnica mas acessível.`,
+    laudo: `Gere um LAUDO PSICOLÓGICO conforme Resolução CFP nº 06/2019. Estrutura: 1. Identificação; 2. Demanda; 3. Procedimentos; 4. Análise e discussão dos resultados; 5. Conclusão com hipótese diagnóstica fundamentada. Use os dados disponíveis. Indique "[A COMPLEMENTAR]" onde faltam dados de testagem formal.`,
+    encaminhamento: `Gere um ENCAMINHAMENTO PSICOLÓGICO formal. Deve conter: identificação do paciente, resumo breve do caso (sem detalhes desnecessários), justificativa do encaminhamento, para qual profissional/serviço (deixar "[A PREENCHER]"), e assinatura com CRP "[A PREENCHER]".`,
+    consentimento: `Gere um TERMO DE CONSENTIMENTO LIVRE E ESCLARECIDO (TCLE) para psicoterapia, conforme exigências do CFP e Resolução 010/2021. Deve conter: apresentação do serviço, objetivos da psicoterapia, método de trabalho, sigilo e suas exceções legais, honorários e cancelamentos, direitos do paciente, dados de contato, assinatura do paciente e da psicóloga com CRP "[A PREENCHER]".`,
+    alta: `Gere um REGISTRO DE ALTA / ENCERRAMENTO DE CASO para prontuário. Deve conter: identificação do paciente, período de acompanhamento, número de sessões realizadas, síntese do progresso terapêutico, motivo do encerramento, orientações pós-alta se aplicável, e assinatura com CRP "[A PREENCHER]".`
+  };
+
+  showModal('loading', `<div style="text-align:center;padding:40px"><div class="loading-spinner" style="margin:0 auto 16px"></div><div>Gerando documento...</div></div>`);
+
+  let content = '';
+  try {
+    if (!ANTHROPIC_API_KEY) {
+      content = generateLocalDoc(docType, p, context, sessions.length);
+    } else {
+      content = await callAI(`${docTemplates[docType] || ''}
+
+Dados clínicos disponíveis:
+${context}
+
+Retorne APENAS o texto do documento, formatado corretamente, sem marcações markdown.`, 2000);
+    }
+  } catch(e) {
+    content = generateLocalDoc(docType, p, context, sessions.length);
+  }
+
+  const docId = uid();
+  d.documents.push({ id: docId, patientId, type: docType, content, createdAt: new Date().toISOString(), editedByUser: false });
+  saveData(d);
+  closeModal();
+  viewDocument(docId, patientId);
+}
+
+function generateLocalDoc(docType, p, context, sessionCount) {
+  const today = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' });
+  const texts = {
+    consentimento: `TERMO DE CONSENTIMENTO LIVRE E ESCLARECIDO
+
+Eu, ${p.name}, declaro que fui informado(a) sobre os objetivos, procedimentos e condições do atendimento psicológico a ser realizado pela Psicóloga [A PREENCHER], CRP [A PREENCHER].
+
+1. OBJETIVOS: O atendimento psicológico visa promover autoconhecimento, bem-estar emocional e enfrentamento de dificuldades psicológicas.
+
+2. PROCEDIMENTOS: O processo terapêutico ocorrerá por meio de sessões individuais com frequência [A PREENCHER], com duração aproximada de [A PREENCHER] minutos cada.
+
+3. SIGILO: As informações compartilhadas são sigilosas, exceto nas situações previstas em lei (risco de vida ao paciente ou terceiros).
+
+4. HONORÁRIOS: O valor combinado é de R$ [A PREENCHER] por pacote de [A PREENCHER] sessões, a ser pago conforme acordado.
+
+5. CANCELAMENTOS: Cancelamentos com menos de 24h de antecedência serão cobrados integralmente.
+
+Declaro estar ciente e concordar com as condições acima.
+
+[A PREENCHER], ${today}
+
+_______________________________          _______________________________
+${p.name}                                Psicóloga [A PREENCHER]
+                                         CRP [A PREENCHER]`,
+    declaracao: `DECLARAÇÃO DE COMPARECIMENTO
+
+Declaro que ${p.name} comparece regularmente a atendimento psicológico sob minha responsabilidade, com frequência semanal, desde ${new Date(p.createdAt).toLocaleDateString('pt-BR')}.
+
+[A PREENCHER], ${today}
+
+_______________________________
+Psicóloga [A PREENCHER]
+CRP [A PREENCHER]`,
+    default: `DOCUMENTO PSICOLÓGICO
+
+Paciente: ${p.name}
+Data: ${today}
+Sessões realizadas: ${sessionCount}
+
+[Adicione a chave de API nas configurações para gerar documentos completos automaticamente]
+
+_______________________________
+Psicóloga [A PREENCHER]
+CRP [A PREENCHER]`
+  };
+  return texts[docType] || texts.default;
+}
+
+function viewDocument(docId, patientId) {
+  const d = getData();
+  const doc = d.documents.find(x => x.id === docId);
+  if (!doc) return;
+
+  showModal('doc', `
+    <div class="modal-header">
+      <div class="modal-title">Documento Psicológico</div>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="doc-preview" contenteditable="true" id="docEditArea">${doc.content}</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-secondary" onclick="printDoc()">🖨 Imprimir</button>
+      <button class="btn btn-primary" onclick="saveDocEdit('${docId}','${patientId}')">💾 Salvar edições</button>
+    </div>`);
+}
+
+function saveDocEdit(docId, patientId) {
+  const d = getData();
+  const doc = d.documents.find(x => x.id === docId);
+  if (!doc) return;
+  const area = document.getElementById('docEditArea');
+  if (area) { doc.content = area.innerText; doc.editedByUser = true; }
+  saveData(d);
+  closeModal();
+  showPatient(patientId, 'documents');
+}
+
+function printDoc() {
+  const area = document.getElementById('docEditArea');
+  if (!area) return;
+  const w = window.open('', '_blank');
+  w.document.write(`<html><body style="font-family:Times New Roman,serif;font-size:13px;line-height:1.8;padding:40px;white-space:pre-wrap">${area.innerText}</body></html>`);
+  w.document.close();
+  w.print();
+}
+
+function confirmDeleteDoc(docId, patientId) {
+  if (confirm('Excluir este documento?')) {
+    const d = getData();
+    d.documents = d.documents.filter(x => x.id !== docId);
+    saveData(d);
+    showPatient(patientId, 'documents');
+  }
+}
+
+// ── PAYMENTS ──
+function renderPatientPayments(d, p) {
+  const packages = d.packages.filter(pkg => pkg.patientId === p.id).sort((a,b) => b.number-a.number);
+  const sessions = d.sessions.filter(s => s.patientId === p.id);
+
+  let html = `<div class="card" style="margin-bottom:16px">
+    <div class="card-header"><div class="card-title">Configuração do Pacote</div></div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">Sessões por Pacote</label>
+        <input type="number" id="pkg_sessions" class="form-input" value="${packages[0]?.sessionsTotal || 4}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor do Pacote (R$)</label>
+        <input type="number" id="pkg_value" class="form-input" value="${packages[0]?.value || ''}">
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <button class="btn btn-secondary btn-sm" onclick="savePackageConfig('${p.id}')">Salvar configuração</button>
+    </div>
+  </div>`;
+
+  // Pacote atual
+  if (packages[0]) {
+    const pkg = packages[0];
+    const sessInPkg = sessions.filter(s => new Date(s.date) >= new Date(pkg.startDate)).length;
+    const pct = Math.round((sessInPkg / pkg.sessionsTotal) * 100);
+    const isLast = sessInPkg >= pkg.sessionsTotal;
+
+    html += `<div class="card" style="margin-bottom:16px">
+      <div class="card-header"><div class="card-title">📦 Pacote Atual</div></div>
+      ${isLast ? '<div class="alert alert-amber">🔔 Última sessão do pacote — combine o pagamento do próximo.</div>' : ''}
+      <div style="font-weight:500;margin-bottom:8px">Pacote ${pkg.number} · Iniciado em ${formatDate(pkg.startDate)}</div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        ${Array.from({length:pkg.sessionsTotal},(_,i)=>`<div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;background:${i<sessInPkg?'var(--sage)':'var(--surface-3)'};color:${i<sessInPkg?'#fff':'var(--ink-muted)'}">
+          ${i<sessInPkg?'✓':(i+1)}
+        </div>`).join('')}
+      </div>
+      <div style="font-size:13px;color:var(--ink-soft);margin-bottom:12px">${sessInPkg} de ${pkg.sessionsTotal} sessões realizadas · ${pkg.sessionsTotal-sessInPkg} restante(s)</div>
+      ${pkg.value ? `<div style="font-size:14px;font-weight:500;margin-bottom:10px">Valor: R$ ${pkg.value.toFixed(2)}</div>` : ''}
+      ${!pkg.paid
+        ? `<button class="btn btn-primary" onclick="markPackagePaid('${pkg.id}')">✓ Marcar como Pago</button>`
+        : '<span class="badge badge-sage" style="font-size:13px;padding:6px 14px">✓ Pago</span>'}
+    </div>`;
+  }
+
+  // Histórico
+  if (packages.length > 1) {
+    html += `<div class="card"><div class="card-header"><div class="card-title">Histórico de Pacotes</div></div>`;
+    packages.slice(1).forEach(pkg => {
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border-soft)">
+        <div>
+          <div style="font-weight:500;font-size:13px">Pacote ${pkg.number}</div>
+          <div style="font-size:12px;color:var(--ink-muted)">${pkg.sessionsTotal} sessões · início ${formatDate(pkg.startDate)}${pkg.value?` · R$ ${pkg.value.toFixed(2)}`:''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${pkg.paid ? '<span class="badge badge-sage">✓ Pago</span>' : `<button class="btn btn-ghost btn-sm" onclick="markPackagePaid('${pkg.id}')">Marcar Pago</button>`}
+          <button class="btn btn-danger btn-sm" onclick="confirmDeletePackage('${pkg.id}','${p.id}')">🗑</button>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  return html;
+}
+
+function markPackagePaid(pkgId) {
+  const d = getData();
+  const pkg = d.packages.find(x => x.id === pkgId);
+  if (pkg) { pkg.paid = true; pkg.paidDate = new Date().toISOString(); }
+  saveData(d);
+  showPatient(currentPatientId, 'payments');
+}
+
+function savePackageConfig(patientId) {
+  const d = getData();
+  const pkg = getCurrentPackage(d, patientId);
+  if (pkg) {
+    pkg.sessionsTotal = parseInt(document.getElementById('pkg_sessions').value) || pkg.sessionsTotal;
+    pkg.value = parseFloat(document.getElementById('pkg_value').value) || pkg.value;
+    saveData(d);
+  }
+}
+
+function confirmDeletePackage(pkgId, patientId) {
+  if (confirm('Excluir este pacote?')) {
+    const d = getData();
+    d.packages = d.packages.filter(p => p.id !== pkgId);
+    saveData(d);
+    showPatient(patientId, 'payments');
+  }
+}
+
+// ── SUPERVISION ──
+function renderPatientSupervision(d, p) {
+  const notes = d.supervisionNotes.filter(n => n.patientId === p.id).sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt));
+
+  let html = `<div class="alert alert-amber">🔒 Área privada · Estas anotações não aparecem em nenhum documento gerado pelo Vínculo.</div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-header"><div class="card-title">Nova Anotação de Supervisão</div></div>
+    <div class="supervision-field">
+      <div class="supervision-note">🔒 Campo privado da terapeuta</div>
+      <textarea id="sup_note" class="form-textarea tall" style="background:transparent;border-color:var(--amber)" placeholder="Contratransferência, dúvidas do caso, o que levar para supervisão, reflexões pessoais sobre o processo..."></textarea>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px">
+      <button class="btn btn-primary" onclick="saveSupervisionNote('${p.id}')">Salvar Anotação</button>
+    </div>
+  </div>`;
+
+  if (notes.length > 0) {
+    html += `<div class="card"><div class="card-header"><div class="card-title">Anotações Anteriores</div></div>`;
+    notes.forEach(n => {
+      html += `<div style="padding:14px 0;border-bottom:1px solid var(--border-soft)">
+        <div style="font-size:11px;color:var(--amber);margin-bottom:6px">${formatDate(n.createdAt)}</div>
+        <div style="font-size:13px;color:var(--ink-soft);white-space:pre-line">${n.note}</div>
+        <div style="display:flex;justify-content:flex-end;margin-top:6px">
+          <button class="btn btn-danger btn-sm" onclick="confirmDeleteSupNote('${n.id}','${p.id}')">🗑</button>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  return html;
+}
+
+function saveSupervisionNote(patientId) {
+  const note = document.getElementById('sup_note').value.trim();
+  if (!note) return;
+  const d = getData();
+  d.supervisionNotes.push({ id: uid(), patientId, note, createdAt: new Date().toISOString() });
+  saveData(d);
+  showPatient(patientId, 'supervision');
+}
+
+function confirmDeleteSupNote(noteId, patientId) {
+  if (confirm('Excluir esta anotação de supervisão?')) {
+    const d = getData();
+    d.supervisionNotes = d.supervisionNotes.filter(n => n.id !== noteId);
+    saveData(d);
+    showPatient(patientId, 'supervision');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EDIT PATIENT
+// ═══════════════════════════════════════════════════════════════
+function editPatient(patientId) {
+  const d = getData();
+  const p = d.patients.find(x => x.id === patientId);
+  if (!p) return;
+
+  showModal('editPatient', `
+    <div class="modal-header">
+      <div class="modal-title">Editar Cadastro</div>
+      <button class="close-btn" onclick="closeModal()">✕</button>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">Nome</label>
+        <input type="text" id="ep_name" class="form-input" value="${p.name}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Iniciais</label>
+        <input type="text" id="ep_initials" class="form-input" value="${p.initials}" maxlength="6">
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group">
+        <label class="form-label">Data de Nascimento</label>
+        <input type="date" id="ep_dob" class="form-input" value="${p.dob || ''}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">WhatsApp</label>
+        <input type="text" id="ep_whatsapp" class="form-input" value="${p.whatsapp || ''}">
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="form-group">
+        <label class="form-label">Dia da Sessão</label>
+        <select id="ep_day" class="form-select">
+          <option value="">Selecione</option>
+          ${['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'].map(d => `<option ${p.sessionDay===d?'selected':''}>${d}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Horário</label>
+        <input type="time" id="ep_time" class="form-input" value="${p.sessionTime || ''}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Duração (min)</label>
+        <input type="number" id="ep_dur" class="form-input" value="${p.sessionDuration || 50}">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Status</label>
+      <select id="ep_status" class="form-select">
+        <option value="active" ${p.status==='active'?'selected':''}>Ativo</option>
+        <option value="paused" ${p.status==='paused'?'selected':''}>Em pausa</option>
+        <option value="encerrado" ${p.status==='encerrado'?'selected':''}>Encerrado</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePatientEdit('${patientId}')">Salvar</button>
+    </div>`);
+}
+
+function savePatientEdit(patientId) {
+  const d = getData();
+  const p = d.patients.find(x => x.id === patientId);
+  if (!p) return;
+  p.name = document.getElementById('ep_name').value.trim() || p.name;
+  p.initials = document.getElementById('ep_initials').value.trim() || p.initials;
+  p.dob = document.getElementById('ep_dob').value;
+  p.whatsapp = document.getElementById('ep_whatsapp').value.trim();
+  p.sessionDay = document.getElementById('ep_day').value;
+  p.sessionTime = document.getElementById('ep_time').value;
+  p.sessionDuration = document.getElementById('ep_dur').value;
+  p.status = document.getElementById('ep_status').value;
+  saveData(d);
+  closeModal();
+  renderSidebarPatients();
+  showPatient(patientId);
+}
+
+function confirmDeletePatient(patientId) {
+  const d = getData();
+  const p = d.patients.find(x => x.id === patientId);
+  if (!p) return;
+  if (!confirm(`Excluir permanentemente o paciente "${p.name}" e todos os seus dados? Esta ação não pode ser desfeita.`)) return;
+  if (!confirm('Tem certeza? Todos os dados serão apagados.')) return;
+  d.patients = d.patients.filter(x => x.id !== patientId);
+  d.sessions = d.sessions.filter(x => x.patientId !== patientId);
+  d.hypotheses = d.hypotheses.filter(x => x.patientId !== patientId);
+  d.strategies = d.strategies.filter(x => x.patientId !== patientId);
+  d.packages = d.packages.filter(x => x.patientId !== patientId);
+  d.documents = d.documents.filter(x => x.patientId !== patientId);
+  d.supervisionNotes = d.supervisionNotes.filter(x => x.patientId !== patientId);
+  saveData(d);
+  currentPatientId = null;
+  renderSidebarPatients();
+  showView('dashboard');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════════════
+function renderSettings() {
+  document.getElementById('topbarTitle').textContent = 'Configurações';
+  document.getElementById('topbarActions').innerHTML = '';
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header"><div class="card-title">🔑 Chave de API Anthropic</div></div>
+      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:14px">Necessária para análise de sessões com IA, geração de hipóteses e documentos automáticos.</p>
+      <div class="form-group">
+        <label class="form-label">Anthropic API Key</label>
+        <input type="password" id="apikey_input" class="form-input" value="${ANTHROPIC_API_KEY}" placeholder="sk-ant-...">
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end">
+        <button class="btn btn-secondary btn-sm" onclick="clearApiKey()">Remover chave</button>
+        <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Salvar chave</button>
+      </div>
+      <p style="font-size:11px;color:var(--ink-muted);margin-top:10px">A chave fica armazenada apenas neste dispositivo/navegador.</p>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header"><div class="card-title">🔒 Segurança</div></div>
+      <div class="form-group">
+        <label class="form-label">Nova Senha de Acesso</label>
+        <input type="password" id="new_pass" class="form-input" placeholder="Nova senha">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirmar Nova Senha</label>
+        <input type="password" id="conf_pass" class="form-input" placeholder="Confirme a senha">
+      </div>
+      <div style="display:flex;justify-content:flex-end">
+        <button class="btn btn-primary btn-sm" onclick="changePassword()">Alterar Senha</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-header"><div class="card-title">💾 Backup dos Dados</div></div>
+      <p style="font-size:13px;color:var(--ink-muted);margin-bottom:14px">Exporte todos os dados para um arquivo JSON. Guarde em local seguro.</p>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary btn-sm" onclick="exportData()">⬇ Exportar backup</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('importFile').click()">⬆ Importar backup</button>
+        <input type="file" id="importFile" class="hidden" accept=".json" onchange="importData(event)">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div class="card-title">🗑 Área de Risco</div></div>
+      <p style="font-size:13px;color:var(--rose);margin-bottom:14px">Apagar todos os dados do Vínculo. Esta ação é irreversível.</p>
+      <button class="btn btn-danger btn-sm" onclick="resetAllData()">Apagar todos os dados</button>
+    </div>`;
+}
+
+function saveApiKey() {
+  const key = document.getElementById('apikey_input').value.trim();
+  ANTHROPIC_API_KEY = key;
+  localStorage.setItem('vinculo_apikey', key);
+  alert('Chave salva com sucesso!');
+}
+
+function clearApiKey() {
+  ANTHROPIC_API_KEY = '';
+  localStorage.removeItem('vinculo_apikey');
+  document.getElementById('apikey_input').value = '';
+  alert('Chave removida.');
+}
+
+function changePassword() {
+  const np = document.getElementById('new_pass').value;
+  const cp = document.getElementById('conf_pass').value;
+  if (!np) { alert('Digite a nova senha.'); return; }
+  if (np !== cp) { alert('Senhas não conferem.'); return; }
+  if (np.length < 6) { alert('Senha deve ter ao menos 6 caracteres.'); return; }
+  localStorage.setItem(PASS_KEY, np);
+  alert('Senha alterada com sucesso!');
+}
+
+function exportData() {
+  const d = getData();
+  const blob = new Blob([JSON.stringify(d, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `vinculo_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (!confirm('Importar este backup? Os dados atuais serão substituídos.')) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      saveData(data);
+      alert('Backup importado com sucesso!');
+      initApp();
+    } catch(err) {
+      alert('Arquivo inválido.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function resetAllData() {
+  if (!confirm('ATENÇÃO: Apagar TODOS os dados do Vínculo? Esta ação não pode ser desfeita.')) return;
+  if (!confirm('Tem certeza absoluta? Todos os pacientes e registros serão apagados.')) return;
+  saveData(defaultData());
+  initApp();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════════════
+function showModal(type, html) {
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalBackdrop').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.add('hidden');
+}
+
+function closeModalBackdrop(e) {
+  if (e.target === document.getElementById('modalBackdrop')) closeModal();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AI API CALL
+// ═══════════════════════════════════════════════════════════════
+async function callAI(prompt, maxTokens = 1500) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: maxTokens,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  if (!response.ok) throw new Error('API error: ' + response.status);
+  const data = await response.json();
+  const text = data.content.map(c => c.text || '').join('');
+
+  // Try to parse as JSON
+  try {
+    const clean = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    return JSON.parse(clean);
+  } catch {
+    return text;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  } catch { return dateStr; }
+}
+</script>
+</body>
+</html>
